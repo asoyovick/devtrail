@@ -1,0 +1,54 @@
+# Environment and secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.crt
+
+# Go build/test artifacts
+bin/
+dist/
+build/
+coverage/
+*.out
+*.test
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Go workspace (local-only)
+go.work
+go.work.sum
+
+# SQLite / local databases
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+*.sqlite3
+
+# Logs and temp files
+*.log
+logs/
+tmp/
+temp/
+.tmp/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Frontend tooling (if introduced later)
+node_modules/
+
+# Render/local runtime
+.render/

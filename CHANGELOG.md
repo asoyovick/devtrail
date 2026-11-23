@@ -1,0 +1,13 @@
+# Changelog
+
+All notable changes to DevTrail will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
+and this project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html) while in the `0.x.x` series until the first stable public release.
+
+## [Unreleased]
+
+### Added
+- Initial repository assessment and Phase 1 architecture proposal (`docs/requirements/phase1-assessment.md`).
+- Initial project README describing DevTrail vision, scope, and planned architecture.
+- Repository workflow baseline: `.gitignore`, `CONTRIBUTING.md`, and branching workflow documentation.
