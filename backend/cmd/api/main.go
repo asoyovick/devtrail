@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"devtrail/backend/internal/activity"
+	"devtrail/backend/internal/investigation"
 	"devtrail/backend/internal/platform/config"
 	"devtrail/backend/internal/platform/database"
 	"devtrail/backend/internal/platform/httpserver"
@@ -81,6 +82,12 @@ func main() {
 		activityHandler := activity.NewHandler(activityService, userHandler.RequireAuth)
 		activityHandler.RegisterRoutes(mux)
 		log.Info("activity routes registered")
+
+		investigationStore := investigation.NewPGStore(pool)
+		investigationService := investigation.NewService(investigationStore)
+		investigationHandler := investigation.NewHandler(investigationService, userHandler.RequireAuth)
+		investigationHandler.RegisterRoutes(mux)
+		log.Info("investigation routes registered")
 	} else {
 		log.Warn("auth routes disabled; DATABASE_URL not configured")
 	}

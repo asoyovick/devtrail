@@ -20,3 +20,4 @@ and this project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.ht
 - Project CRUD endpoints: create, list, get, update, and archive with per-user ownership checks.
 - Development session endpoints: start, list, get, pause, resume, and end with project ownership checks and state transition validation.
 - Activity event foundation: `activity_events` migration, idempotent batch ingestion endpoint, and activity timeline listing endpoint.
+- Debugging journal foundation: `investigations` migration and CRUD endpoints with user/project ownership checks.
