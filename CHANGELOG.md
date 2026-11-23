@@ -18,3 +18,5 @@ and this project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.ht
 - Auth foundation: `auth_sessions` migration, password hashing, and secure token generation/hash helpers.
 - User auth endpoints: register, login, logout, and `/me` with opaque session tokens and ownership-scoped auth middleware.
 - Project CRUD endpoints: create, list, get, update, and archive with per-user ownership checks.
+- Development session endpoints: start, list, get, pause, resume, and end with project ownership checks and state transition validation.
+- Activity event foundation: `activity_events` migration, idempotent batch ingestion endpoint, and activity timeline listing endpoint.
