@@ -2,26 +2,40 @@ package main
 
 import (
 	"context"
-	"log"
+	"log/slog"
 	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
+
+	"devtrail/backend/internal/platform/config"
+	"devtrail/backend/internal/platform/httpserver"
+	"devtrail/backend/internal/platform/logger"
 )
 
 func main() {
-	addr := envOrDefault("HTTP_ADDR", ":8080")
+	cfg, err := config.Load()
+	if err != nil {
+		// Logger is not initialized yet; use stderr.
+		os.Stderr.WriteString("config error: " + err.Error() + "\n")
+		os.Exit(1)
+	}
+
+	log, err := logger.New(cfg.LogLevel)
+	if err != nil {
+		os.Stderr.WriteString("logger error: " + err.Error() + "\n")
+		os.Exit(1)
+	}
+	slog.SetDefault(log)
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /healthz", func(w http.ResponseWriter, _ *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusOK)
-		_, _ = w.Write([]byte(`{"status":"ok"}`))
+		httpserver.JSON(w, http.StatusOK, map[string]string{"status": "ok"})
 	})
 
 	srv := &http.Server{
-		Addr:              addr,
+		Addr:              cfg.HTTPAddr,
 		Handler:           mux,
 		ReadHeaderTimeout: 5 * time.Second,
 	}
@@ -30,23 +44,19 @@ func main() {
 	defer stop()
 
 	go func() {
-		log.Printf("devtrail api listening on %s", addr)
+		log.Info("devtrail api listening", "addr", cfg.HTTPAddr, "env", cfg.AppEnv)
 		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			log.Fatalf("server error: %v", err)
+			log.Error("server error", "error", err)
+			os.Exit(1)
 		}
 	}()
 
 	<-ctx.Done()
+	log.Info("shutdown signal received")
+
 	shutdownCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	if err := srv.Shutdown(shutdownCtx); err != nil {
-		log.Printf("shutdown error: %v", err)
+		log.Error("shutdown error", "error", err)
 	}
-}
-
-func envOrDefault(key, fallback string) string {
-	if value := os.Getenv(key); value != "" {
-		return value
-	}
-	return fallback
 }
