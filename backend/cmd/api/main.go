@@ -12,6 +12,7 @@ import (
 	"devtrail/backend/internal/activity"
 	"devtrail/backend/internal/decision"
 	"devtrail/backend/internal/gitactivity"
+	"devtrail/backend/internal/insight"
 	"devtrail/backend/internal/investigation"
 	"devtrail/backend/internal/note"
 	"devtrail/backend/internal/platform/config"
@@ -19,6 +20,7 @@ import (
 	"devtrail/backend/internal/platform/httpserver"
 	"devtrail/backend/internal/platform/logger"
 	"devtrail/backend/internal/project"
+	"devtrail/backend/internal/report"
 	"devtrail/backend/internal/session"
 	"devtrail/backend/internal/testrun"
 	"devtrail/backend/internal/user"
@@ -116,6 +118,16 @@ func main() {
 		gitHandler := gitactivity.NewHandler(gitService, userHandler.RequireAuth)
 		gitHandler.RegisterRoutes(mux)
 		log.Info("git activity routes registered")
+
+		reportService := report.NewService(pool)
+		reportHandler := report.NewHandler(reportService, userHandler.RequireAuth)
+		reportHandler.RegisterRoutes(mux)
+		log.Info("report routes registered")
+
+		insightService := insight.NewService(pool)
+		insightHandler := insight.NewHandler(insightService, userHandler.RequireAuth)
+		insightHandler.RegisterRoutes(mux)
+		log.Info("insight routes registered")
 	} else {
 		log.Warn("auth routes disabled; DATABASE_URL not configured")
 	}

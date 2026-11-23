@@ -25,3 +25,5 @@ and this project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.ht
 - Technical notes foundation: `notes` migration and CRUD/delete endpoints with user ownership checks.
 - Test run history foundation: `test_runs` migration and create/list/get endpoints with user/project ownership checks.
 - Git activity foundation: `git_commits` migration and create/list endpoints with idempotent upsert by project+commit hash.
+- Reporting foundation: daily/weekly/project report endpoints with JSON and Markdown output from recorded data.
+- Insights foundation: rule-based, evidence-backed insights for recurring test failures and improvement areas.
