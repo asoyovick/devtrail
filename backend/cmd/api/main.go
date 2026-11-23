@@ -11,6 +11,7 @@ import (
 
 	"devtrail/backend/internal/activity"
 	"devtrail/backend/internal/decision"
+	"devtrail/backend/internal/gitactivity"
 	"devtrail/backend/internal/investigation"
 	"devtrail/backend/internal/note"
 	"devtrail/backend/internal/platform/config"
@@ -19,6 +20,7 @@ import (
 	"devtrail/backend/internal/platform/logger"
 	"devtrail/backend/internal/project"
 	"devtrail/backend/internal/session"
+	"devtrail/backend/internal/testrun"
 	"devtrail/backend/internal/user"
 
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -102,6 +104,18 @@ func main() {
 		noteHandler := note.NewHandler(noteService, userHandler.RequireAuth)
 		noteHandler.RegisterRoutes(mux)
 		log.Info("note routes registered")
+
+		testRunStore := testrun.NewPGStore(pool)
+		testRunService := testrun.NewService(testRunStore)
+		testRunHandler := testrun.NewHandler(testRunService, userHandler.RequireAuth)
+		testRunHandler.RegisterRoutes(mux)
+		log.Info("test run routes registered")
+
+		gitStore := gitactivity.NewPGStore(pool)
+		gitService := gitactivity.NewService(gitStore)
+		gitHandler := gitactivity.NewHandler(gitService, userHandler.RequireAuth)
+		gitHandler.RegisterRoutes(mux)
+		log.Info("git activity routes registered")
 	} else {
 		log.Warn("auth routes disabled; DATABASE_URL not configured")
 	}
