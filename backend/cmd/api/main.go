@@ -13,6 +13,7 @@ import (
 	"devtrail/backend/internal/platform/database"
 	"devtrail/backend/internal/platform/httpserver"
 	"devtrail/backend/internal/platform/logger"
+	"devtrail/backend/internal/project"
 	"devtrail/backend/internal/user"
 
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -60,6 +61,12 @@ func main() {
 		userHandler := user.NewHandler(userService)
 		userHandler.RegisterRoutes(mux)
 		log.Info("auth routes registered")
+
+		projectStore := project.NewPGStore(pool)
+		projectService := project.NewService(projectStore)
+		projectHandler := project.NewHandler(projectService, userHandler.RequireAuth)
+		projectHandler.RegisterRoutes(mux)
+		log.Info("project routes registered")
 	} else {
 		log.Warn("auth routes disabled; DATABASE_URL not configured")
 	}

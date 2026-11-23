@@ -17,3 +17,4 @@ and this project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.ht
 - Backend HTTP platform: request ID, structured request logging, panic recovery middleware, and `/api/v1/healthz` endpoint.
 - Auth foundation: `auth_sessions` migration, password hashing, and secure token generation/hash helpers.
 - User auth endpoints: register, login, logout, and `/me` with opaque session tokens and ownership-scoped auth middleware.
+- Project CRUD endpoints: create, list, get, update, and archive with per-user ownership checks.
