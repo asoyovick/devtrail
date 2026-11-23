@@ -1,3 +1,3 @@
-module devtrail
+module devtrail/backend
 
 go 1.22.2
