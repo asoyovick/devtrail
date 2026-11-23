@@ -27,3 +27,6 @@ and this project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.ht
 - Git activity foundation: `git_commits` migration and create/list endpoints with idempotent upsert by project+commit hash.
 - Reporting foundation: daily/weekly/project report endpoints with JSON and Markdown output from recorded data.
 - Insights foundation: rule-based, evidence-backed insights for recurring test failures and improvement areas.
+- Backend hardening: request body limits, security headers, CORS configuration, and in-memory rate limiting middleware.
+- Deployment/runtime scaffolding: backend Dockerfile, docker-compose PostgreSQL service, Render blueprint, and optional DB integration smoke test.
+- CI baseline: GitHub Actions workflow for backend formatting, vet, and tests.

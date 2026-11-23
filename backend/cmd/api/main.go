@@ -132,7 +132,16 @@ func main() {
 		log.Warn("auth routes disabled; DATABASE_URL not configured")
 	}
 
-	handler := httpserver.Recover(log, httpserver.RequestID(httpserver.Logging(log, mux)))
+	rateLimiter := httpserver.NewRateLimiter(cfg.RateLimitPerMinute, time.Minute)
+	handler := httpserver.BodyLimit(cfg.MaxBodyBytes,
+		httpserver.SecurityHeaders(
+			httpserver.CORS(cfg.CORSAllowedOrigins,
+				rateLimiter.Middleware(
+					httpserver.Recover(log, httpserver.RequestID(httpserver.Logging(log, mux))),
+				),
+			),
+		),
+	)
 
 	srv := &http.Server{
 		Addr:              cfg.HTTPAddr,
