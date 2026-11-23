@@ -1,0 +1,25 @@
+services:
+  - type: web
+    name: devtrail-api
+    runtime: docker
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: HTTP_ADDR
+        value: :8080
+      - key: DATABASE_URL
+        fromDatabase:
+          name: devtrail-db
+          property: connectionString
+      - key: AUTH_TOKEN_TTL_HOURS
+        value: "72"
+      - key: LOG_LEVEL
+        value: info
+    healthCheckPath: /healthz
+
+databases:
+  - name: devtrail-db
+    databaseName: devtrail
+    user: devtrail

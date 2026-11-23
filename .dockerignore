@@ -1,0 +1,11 @@
+.git
+.gitignore
+**/.env
+**/*.db
+**/*.sqlite
+**/tmp
+**/bin
+**/dist
+docs
+frontend
+cli
