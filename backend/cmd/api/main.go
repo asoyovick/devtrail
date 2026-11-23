@@ -10,7 +10,9 @@ import (
 	"time"
 
 	"devtrail/backend/internal/activity"
+	"devtrail/backend/internal/decision"
 	"devtrail/backend/internal/investigation"
+	"devtrail/backend/internal/note"
 	"devtrail/backend/internal/platform/config"
 	"devtrail/backend/internal/platform/database"
 	"devtrail/backend/internal/platform/httpserver"
@@ -88,6 +90,18 @@ func main() {
 		investigationHandler := investigation.NewHandler(investigationService, userHandler.RequireAuth)
 		investigationHandler.RegisterRoutes(mux)
 		log.Info("investigation routes registered")
+
+		decisionStore := decision.NewPGStore(pool)
+		decisionService := decision.NewService(decisionStore)
+		decisionHandler := decision.NewHandler(decisionService, userHandler.RequireAuth)
+		decisionHandler.RegisterRoutes(mux)
+		log.Info("decision routes registered")
+
+		noteStore := note.NewPGStore(pool)
+		noteService := note.NewService(noteStore)
+		noteHandler := note.NewHandler(noteService, userHandler.RequireAuth)
+		noteHandler.RegisterRoutes(mux)
+		log.Info("note routes registered")
 	} else {
 		log.Warn("auth routes disabled; DATABASE_URL not configured")
 	}
