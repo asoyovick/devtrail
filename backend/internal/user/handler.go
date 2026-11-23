@@ -116,6 +116,14 @@ func SessionFromContext(ctx context.Context) (AuthSession, bool) {
 	return s, ok
 }
 
+func WithUser(ctx context.Context, u User) context.Context {
+	return context.WithValue(ctx, userContextKey, u)
+}
+
+func WithSession(ctx context.Context, s AuthSession) context.Context {
+	return context.WithValue(ctx, sessionContextKey, s)
+}
+
 func bearerToken(header string) string {
 	if header == "" {
 		return ""
