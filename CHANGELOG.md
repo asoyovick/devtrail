@@ -14,3 +14,4 @@ and this project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.ht
 - Phase 2 architecture decision records for module layout, auth, event model/sync, privacy defaults, and frontend serving (`docs/decisions/`).
 - Initial Phase 2 foundation scaffold: backend health endpoint, CLI entrypoint, frontend shell placeholder, config example, and Makefile targets.
 - Backend platform database foundation: pgx pool connection, `/readyz` endpoint, initial SQL migrations, and migration Makefile targets.
+- Backend HTTP platform: request ID, structured request logging, panic recovery middleware, and `/api/v1/healthz` endpoint.
