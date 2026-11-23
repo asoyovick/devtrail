@@ -13,6 +13,7 @@ import (
 	"devtrail/backend/internal/platform/database"
 	"devtrail/backend/internal/platform/httpserver"
 	"devtrail/backend/internal/platform/logger"
+	"devtrail/backend/internal/user"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 )
@@ -52,6 +53,16 @@ func main() {
 	mux.HandleFunc("GET /api/v1/healthz", func(w http.ResponseWriter, _ *http.Request) {
 		httpserver.JSON(w, http.StatusOK, map[string]string{"status": "ok", "version": "v1"})
 	})
+
+	if pool != nil {
+		userStore := user.NewPGStore(pool)
+		userService := user.NewService(userStore, time.Duration(cfg.AuthTokenTTLHours)*time.Hour)
+		userHandler := user.NewHandler(userService)
+		userHandler.RegisterRoutes(mux)
+		log.Info("auth routes registered")
+	} else {
+		log.Warn("auth routes disabled; DATABASE_URL not configured")
+	}
 
 	handler := httpserver.Recover(log, httpserver.RequestID(httpserver.Logging(log, mux)))
 
