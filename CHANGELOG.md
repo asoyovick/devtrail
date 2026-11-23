@@ -13,3 +13,4 @@ and this project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.ht
 - Repository workflow baseline: `.gitignore`, `CONTRIBUTING.md`, and branching workflow documentation.
 - Phase 2 architecture decision records for module layout, auth, event model/sync, privacy defaults, and frontend serving (`docs/decisions/`).
 - Initial Phase 2 foundation scaffold: backend health endpoint, CLI entrypoint, frontend shell placeholder, config example, and Makefile targets.
+- Backend platform database foundation: pgx pool connection, `/readyz` endpoint, initial SQL migrations, and migration Makefile targets.

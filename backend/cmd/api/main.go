@@ -10,14 +10,16 @@ import (
 	"time"
 
 	"devtrail/backend/internal/platform/config"
+	"devtrail/backend/internal/platform/database"
 	"devtrail/backend/internal/platform/httpserver"
 	"devtrail/backend/internal/platform/logger"
+
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 func main() {
 	cfg, err := config.Load()
 	if err != nil {
-		// Logger is not initialized yet; use stderr.
 		os.Stderr.WriteString("config error: " + err.Error() + "\n")
 		os.Exit(1)
 	}
@@ -29,10 +31,24 @@ func main() {
 	}
 	slog.SetDefault(log)
 
+	var pool *pgxpool.Pool
+	if cfg.DatabaseURL != "" {
+		pool, err = database.Connect(context.Background(), cfg.DatabaseURL)
+		if err != nil {
+			log.Error("database connection failed", "error", err)
+			os.Exit(1)
+		}
+		defer pool.Close()
+		log.Info("database connected")
+	} else {
+		log.Warn("DATABASE_URL not set; starting without database")
+	}
+
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /healthz", func(w http.ResponseWriter, _ *http.Request) {
 		httpserver.JSON(w, http.StatusOK, map[string]string{"status": "ok"})
 	})
+	mux.HandleFunc("GET /readyz", readyzHandler(pool))
 
 	srv := &http.Server{
 		Addr:              cfg.HTTPAddr,
@@ -58,5 +74,23 @@ func main() {
 	defer cancel()
 	if err := srv.Shutdown(shutdownCtx); err != nil {
 		log.Error("shutdown error", "error", err)
+	}
+}
+
+func readyzHandler(pool *pgxpool.Pool) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if pool == nil {
+			httpserver.Error(w, http.StatusServiceUnavailable, "database_not_configured", "database is not configured", nil)
+			return
+		}
+
+		ctx, cancel := context.WithTimeout(r.Context(), 2*time.Second)
+		defer cancel()
+		if err := pool.Ping(ctx); err != nil {
+			httpserver.Error(w, http.StatusServiceUnavailable, "database_unavailable", "database ping failed", nil)
+			return
+		}
+
+		httpserver.JSON(w, http.StatusOK, map[string]string{"status": "ready"})
 	}
 }
