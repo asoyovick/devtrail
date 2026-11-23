@@ -11,3 +11,4 @@ and this project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.ht
 - Initial repository assessment and Phase 1 architecture proposal (`docs/requirements/phase1-assessment.md`).
 - Initial project README describing DevTrail vision, scope, and planned architecture.
 - Repository workflow baseline: `.gitignore`, `CONTRIBUTING.md`, and branching workflow documentation.
+- Phase 2 architecture decision records for module layout, auth, event model/sync, privacy defaults, and frontend serving (`docs/decisions/`).
