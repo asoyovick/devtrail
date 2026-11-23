@@ -49,10 +49,15 @@ func main() {
 		httpserver.JSON(w, http.StatusOK, map[string]string{"status": "ok"})
 	})
 	mux.HandleFunc("GET /readyz", readyzHandler(pool))
+	mux.HandleFunc("GET /api/v1/healthz", func(w http.ResponseWriter, _ *http.Request) {
+		httpserver.JSON(w, http.StatusOK, map[string]string{"status": "ok", "version": "v1"})
+	})
+
+	handler := httpserver.Recover(log, httpserver.RequestID(httpserver.Logging(log, mux)))
 
 	srv := &http.Server{
 		Addr:              cfg.HTTPAddr,
-		Handler:           mux,
+		Handler:           handler,
 		ReadHeaderTimeout: 5 * time.Second,
 	}
 
