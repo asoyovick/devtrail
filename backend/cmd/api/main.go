@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"path/filepath"
+	"strings"
 	"syscall"
 	"time"
 
@@ -22,6 +24,7 @@ import (
 	"devtrail/backend/internal/project"
 	"devtrail/backend/internal/report"
 	"devtrail/backend/internal/session"
+	"devtrail/backend/internal/streaming"
 	"devtrail/backend/internal/testrun"
 	"devtrail/backend/internal/user"
 
@@ -83,8 +86,14 @@ func main() {
 		sessionHandler.RegisterRoutes(mux)
 		log.Info("session routes registered")
 
+		streamHub := streaming.NewHub()
+		streamHandler := streaming.NewHandler(streamHub, userHandler.RequireAuth)
+		streamHandler.RegisterRoutes(mux)
+		log.Info("streaming routes registered")
+
 		activityStore := activity.NewPGStore(pool)
 		activityService := activity.NewService(activityStore)
+		activityService.SetPublisher(streamPublisher{hub: streamHub})
 		activityHandler := activity.NewHandler(activityService, userHandler.RequireAuth)
 		activityHandler.RegisterRoutes(mux)
 		log.Info("activity routes registered")
@@ -130,6 +139,16 @@ func main() {
 		log.Info("insight routes registered")
 	} else {
 		log.Warn("auth routes disabled; DATABASE_URL not configured")
+	}
+
+	if cfg.FrontendDir != "" {
+		if info, err := os.Stat(cfg.FrontendDir); err == nil && info.IsDir() {
+			fs := http.FileServer(http.Dir(cfg.FrontendDir))
+			mux.HandleFunc("GET /", frontendHandler(cfg.FrontendDir, fs))
+			log.Info("frontend static files enabled", "dir", cfg.FrontendDir)
+		} else {
+			log.Warn("frontend directory not found; static serving disabled", "dir", cfg.FrontendDir)
+		}
 	}
 
 	rateLimiter := httpserver.NewRateLimiter(cfg.RateLimitPerMinute, time.Minute)
@@ -185,5 +204,41 @@ func readyzHandler(pool *pgxpool.Pool) http.HandlerFunc {
 		}
 
 		httpserver.JSON(w, http.StatusOK, map[string]string{"status": "ready"})
+	}
+}
+
+type streamPublisher struct{ hub *streaming.Hub }
+
+func (p streamPublisher) Publish(userID string, ev activity.PublishedEvent) {
+	p.hub.Publish(userID, streaming.Event{ID: ev.ID, Type: ev.Type, ProjectID: ev.ProjectID, SessionID: ev.SessionID, Source: ev.Source, OccurredAt: ev.OccurredAt, Payload: ev.Payload})
+}
+
+func frontendHandler(dir string, fs http.Handler) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if strings.HasPrefix(r.URL.Path, "/api/") || r.URL.Path == "/healthz" || r.URL.Path == "/readyz" {
+			http.NotFound(w, r)
+			return
+		}
+		clean := filepath.Clean(r.URL.Path)
+		if clean == "/" || clean == "." {
+			http.ServeFile(w, r, filepath.Join(dir, "index.html"))
+			return
+		}
+		full := filepath.Join(dir, filepath.FromSlash(clean))
+		info, err := os.Stat(full)
+		if err == nil {
+			if info.IsDir() {
+				index := filepath.Join(full, "index.html")
+				if _, err := os.Stat(index); err == nil {
+					http.ServeFile(w, r, index)
+					return
+				}
+				http.NotFound(w, r)
+				return
+			}
+			fs.ServeHTTP(w, r)
+			return
+		}
+		http.NotFound(w, r)
 	}
 }
