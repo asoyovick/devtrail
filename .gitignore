@@ -52,3 +52,6 @@ node_modules/
 
 # Render/local runtime
 .render/
+
+# backend binary
+backend/api
